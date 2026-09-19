@@ -183,3 +183,20 @@ def test_one_second_gives_the_sample_rate():
     psg = PSG(sample_rate=44_100)
     psg.run(3_579_545)
     assert abs(len(psg.take_samples()) - 44_100) <= 1
+
+
+def test_samples_write_as_a_stereo_wav(tmp_path):
+    import wave
+
+    from sms_python.wav import write_wav
+
+    psg = PSG(sample_rate=22_050)
+    psg.write(0x8E)
+    psg.write(0x0F)
+    psg.write(0x90)
+    psg.run(3_579_545 // 10)
+    path = tmp_path / "tone.wav"
+    write_wav(path, psg.take_samples(), 22_050)
+    with wave.open(str(path)) as audio:
+        assert (audio.getnchannels(), audio.getsampwidth(), audio.getframerate()) == (2, 2, 22_050)
+        assert abs(audio.getnframes() - 2_205) <= 1
