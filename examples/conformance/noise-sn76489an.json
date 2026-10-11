@@ -1,0 +1,163 @@
+{
+ "version": 1,
+ "name": "noise-sn76489an",
+ "variant": "sn76489an",
+ "clocks": 146264,
+ "events": [
+  {
+   "t": 40,
+   "kind": "write",
+   "data": 240
+  },
+  {
+   "t": 72,
+   "kind": "write",
+   "data": 192
+  },
+  {
+   "t": 104,
+   "kind": "write",
+   "data": 0
+  },
+  {
+   "t": 136,
+   "kind": "write",
+   "data": 224
+  },
+  {
+   "t": 6136,
+   "kind": "write",
+   "data": 225
+  },
+  {
+   "t": 12136,
+   "kind": "write",
+   "data": 226
+  },
+  {
+   "t": 18136,
+   "kind": "write",
+   "data": 227
+  },
+  {
+   "t": 24136,
+   "kind": "write",
+   "data": 228
+  },
+  {
+   "t": 30136,
+   "kind": "write",
+   "data": 229
+  },
+  {
+   "t": 36136,
+   "kind": "write",
+   "data": 230
+  },
+  {
+   "t": 42136,
+   "kind": "write",
+   "data": 231
+  },
+  {
+   "t": 48136,
+   "kind": "write",
+   "data": 195
+  },
+  {
+   "t": 48168,
+   "kind": "write",
+   "data": 0
+  },
+  {
+   "t": 48200,
+   "kind": "write",
+   "data": 224
+  },
+  {
+   "t": 54200,
+   "kind": "write",
+   "data": 225
+  },
+  {
+   "t": 60200,
+   "kind": "write",
+   "data": 226
+  },
+  {
+   "t": 66200,
+   "kind": "write",
+   "data": 227
+  },
+  {
+   "t": 72200,
+   "kind": "write",
+   "data": 228
+  },
+  {
+   "t": 78200,
+   "kind": "write",
+   "data": 229
+  },
+  {
+   "t": 84200,
+   "kind": "write",
+   "data": 230
+  },
+  {
+   "t": 90200,
+   "kind": "write",
+   "data": 231
+  },
+  {
+   "t": 96200,
+   "kind": "write",
+   "data": 192
+  },
+  {
+   "t": 96232,
+   "kind": "write",
+   "data": 4
+  },
+  {
+   "t": 96264,
+   "kind": "write",
+   "data": 224
+  },
+  {
+   "t": 102264,
+   "kind": "write",
+   "data": 225
+  },
+  {
+   "t": 108264,
+   "kind": "write",
+   "data": 226
+  },
+  {
+   "t": 114264,
+   "kind": "write",
+   "data": 227
+  },
+  {
+   "t": 120264,
+   "kind": "write",
+   "data": 228
+  },
+  {
+   "t": 126264,
+   "kind": "write",
+   "data": 229
+  },
+  {
+   "t": 132264,
+   "kind": "write",
+   "data": 230
+  },
+  {
+   "t": 138264,
+   "kind": "write",
+   "data": 231
+  }
+ ]
+}

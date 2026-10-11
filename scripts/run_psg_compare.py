@@ -22,8 +22,9 @@ other variants share the engine and differ only in data (docs/contract.md).
 The streams
 -----------
 
-* **synthetic**: two seeded random walks over all eight registers, every tone period,
-  every noise setting, every attenuation.
+* **synthetic**: two seeded random walks over all eight registers, a dense one with
+  writes one to four clocks apart, every tone period, every noise setting, every
+  attenuation.
 * **--streams**: every event file in ``validation/streams/`` -- the writes a board's
   PSG received while running a cartridge, exported by
   ``scripts/export_board_streams.py`` (local; derived from ROMs).
@@ -60,6 +61,22 @@ def stream_random(seed: int, count: int) -> list[tuple[int, int]]:
         if rng.random() < 0.6:
             events.append((clock, rng.randrange(0x40)))
             clock += rng.randrange(20, 400)
+    return events
+
+
+def stream_dense(seed: int, count: int) -> list[tuple[int, int]]:
+    """Writes one to four clocks apart, faster than any console writes, so a write
+    lands on the clock straight after another: the die's single data register then
+    hands the earlier write's register update the later byte (the core's ``write``)."""
+    rng = random.Random(seed)
+    events: list[tuple[int, int]] = []
+    clock = 40
+    for _ in range(count):
+        if rng.random() < 0.5:
+            events.append((clock, 0x80 | (rng.randrange(8) << 4) | rng.randrange(16)))
+        else:
+            events.append((clock, rng.randrange(0x80)))
+        clock += rng.choice((1, 1, 2, 3, 4, rng.randrange(5, 200)))
     return events
 
 
@@ -158,6 +175,7 @@ def main(argv: list[str] | None = None) -> int:
     streams = [
         ("random (seed 1, 3000 latches)", stream_random(1, 3000)),
         ("random (seed 2, 3000 latches)", stream_random(2, 3000)),
+        ("dense (seed 3, 6000 writes)", stream_dense(3, 6000)),
         ("every tone period", stream_tones()),
         ("every noise setting", stream_noise()),
         ("every attenuation", stream_volumes()),

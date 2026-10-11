@@ -28,5 +28,5 @@ def test_the_synthetic_streams_match_nuked_psg_at_every_clock():
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "5 streams" in result.stdout
+    assert "6 streams" in result.stdout
     assert ", 0 not identical" in result.stdout

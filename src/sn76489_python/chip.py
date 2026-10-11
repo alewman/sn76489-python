@@ -169,10 +169,11 @@ class SN76489:
         self.ic_latch1 = 0
         self.ic_latch2 = 0
         self.ic = 1
-        #: The write pipeline: the byte last written, and whether it is still to be
-        #: applied to a register (ympsg.c's ``data`` and ``write_flag_l``).
-        self._pending: int | None = None
+        #: The write pipeline (ympsg.c's ``data``, ``write_flag`` and ``write_flag_l``):
+        #: the data register, which a write replaces at once; a write not yet taken
+        #: in by a clock; a byte taken in and still to reach its register.
         self._data = 0
+        self._write_flag = False
         self._write_flag_l = False
         self.clock = 0
         #: One entry per finished sample: the four attenuations being driven.
@@ -200,9 +201,13 @@ class SN76489:
         is not wired on the Master System, so there is no read.
 
         The byte reaches its register on the next input clock: run the chip up to the
-        moment of the write first.
+        moment of the write first. It replaces the data register at once, so a write on
+        the clock straight after another hands the first one's register update its own
+        byte, as the die does (``YMPSG_Write``, ympsg.c lines 238-242). No console can
+        write that fast; the conformance kit's ``back-to-back`` example does.
         """
-        self._pending = value & 0xFF
+        self._data = value & 0xFF
+        self._write_flag = True
 
     def write_stereo(self, value: int) -> None:
         """The Game Gear's port $06: per-channel left and right enables. Ignored on
@@ -248,13 +253,11 @@ class SN76489:
             if self._write_flag_l:
                 self._update_registers()
                 self._write_flag_l = False
-            pending = self._pending
-            if pending is not None:
+            if self._write_flag:
                 # The channel latch is taken on the clock of the write itself.
-                if pending & 0x80:
-                    self.latch = (pending >> 4) & 7
-                self._data = pending
-                self._pending = None
+                if self._data & 0x80:
+                    self.latch = (self._data >> 4) & 7
+                self._write_flag = False
                 self._write_flag_l = True
             if p1:
                 if p2_latch:

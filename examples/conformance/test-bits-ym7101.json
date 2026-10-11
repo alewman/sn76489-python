@@ -1,0 +1,83 @@
+{
+ "version": 1,
+ "name": "test-bits-ym7101",
+ "variant": "ym7101",
+ "clocks": 7551,
+ "events": [
+  {
+   "t": 40,
+   "kind": "write",
+   "data": 147
+  },
+  {
+   "t": 43,
+   "kind": "write",
+   "data": 180
+  },
+  {
+   "t": 46,
+   "kind": "write",
+   "data": 213
+  },
+  {
+   "t": 49,
+   "kind": "write",
+   "data": 246
+  },
+  {
+   "t": 52,
+   "kind": "write",
+   "data": 128
+  },
+  {
+   "t": 55,
+   "kind": "write",
+   "data": 16
+  },
+  {
+   "t": 58,
+   "kind": "test",
+   "data": 1
+  },
+  {
+   "t": 835,
+   "kind": "test",
+   "data": 0
+  },
+  {
+   "t": 1612,
+   "kind": "test",
+   "data": 2
+  },
+  {
+   "t": 2389,
+   "kind": "test",
+   "data": 4
+  },
+  {
+   "t": 3166,
+   "kind": "test",
+   "data": 6
+  },
+  {
+   "t": 3943,
+   "kind": "test",
+   "data": 7
+  },
+  {
+   "t": 4720,
+   "kind": "test",
+   "data": 0
+  },
+  {
+   "t": 5497,
+   "kind": "test",
+   "data": 1
+  },
+  {
+   "t": 6274,
+   "kind": "test",
+   "data": 0
+  }
+ ]
+}

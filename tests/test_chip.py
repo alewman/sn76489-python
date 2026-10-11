@@ -297,3 +297,9 @@ def test_the_test_bit_drives_every_channel():
     assert psg.attenuations()[3] == 15  # the noise register is still all zero
     psg.write_test(1)
     assert psg.attenuations() == (2, 4, 6, 8)
+
+
+def test_the_readmes_minimal_host_runs():
+    import runpy
+
+    runpy.run_path(str(ROOT / "examples" / "minimal_host.py"), run_name="__main__")

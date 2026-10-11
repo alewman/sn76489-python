@@ -1,0 +1,118 @@
+{
+ "version": 1,
+ "name": "stereo-game-gear",
+ "variant": "game-gear",
+ "clocks": 17080,
+ "events": [
+  {
+   "t": 40,
+   "kind": "write",
+   "data": 129
+  },
+  {
+   "t": 44,
+   "kind": "write",
+   "data": 1
+  },
+  {
+   "t": 48,
+   "kind": "write",
+   "data": 144
+  },
+  {
+   "t": 52,
+   "kind": "write",
+   "data": 163
+  },
+  {
+   "t": 56,
+   "kind": "write",
+   "data": 2
+  },
+  {
+   "t": 60,
+   "kind": "write",
+   "data": 178
+  },
+  {
+   "t": 64,
+   "kind": "write",
+   "data": 197
+  },
+  {
+   "t": 68,
+   "kind": "write",
+   "data": 3
+  },
+  {
+   "t": 72,
+   "kind": "write",
+   "data": 212
+  },
+  {
+   "t": 76,
+   "kind": "write",
+   "data": 228
+  },
+  {
+   "t": 76,
+   "kind": "write",
+   "data": 241
+  },
+  {
+   "t": 80,
+   "kind": "stereo",
+   "data": 0
+  },
+  {
+   "t": 1580,
+   "kind": "stereo",
+   "data": 255
+  },
+  {
+   "t": 3080,
+   "kind": "stereo",
+   "data": 16
+  },
+  {
+   "t": 4580,
+   "kind": "stereo",
+   "data": 1
+  },
+  {
+   "t": 6080,
+   "kind": "stereo",
+   "data": 130
+  },
+  {
+   "t": 7580,
+   "kind": "stereo",
+   "data": 40
+  },
+  {
+   "t": 9080,
+   "kind": "stereo",
+   "data": 240
+  },
+  {
+   "t": 10580,
+   "kind": "stereo",
+   "data": 15
+  },
+  {
+   "t": 12080,
+   "kind": "stereo",
+   "data": 90
+  },
+  {
+   "t": 13580,
+   "kind": "stereo",
+   "data": 165
+  },
+  {
+   "t": 15080,
+   "kind": "stereo",
+   "data": 255
+  }
+ ]
+}
