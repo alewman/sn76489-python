@@ -47,6 +47,10 @@ FILES = [
 ]
 
 
+#: SMS Power answers Python's default user agent with 403 Forbidden.
+USER_AGENT = "Mozilla/5.0 (sn76489-python reference fetch)"
+
+
 def sha256(path: Path) -> str | None:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
 
@@ -63,7 +67,8 @@ def fetch_files(verify: bool) -> int:
             bad += 1
             continue
         path.parent.mkdir(parents=True, exist_ok=True)
-        with urllib.request.urlopen(entry["url"], timeout=60) as response:
+        request = urllib.request.Request(entry["url"], headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(request, timeout=60) as response:
             data = response.read()
         if hashlib.sha256(data).hexdigest() != entry["sha256"]:
             print(f"{entry['path']}: fetched file has the wrong SHA-256; not saved")
