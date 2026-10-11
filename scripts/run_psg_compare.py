@@ -1,49 +1,52 @@
 #!/usr/bin/env python
-"""Milestone 4's PSG acceptance: the board's PSG against Nuked-PSG.
+"""The PSG acceptance: this chip against Nuked-PSG, at every input clock.
 
-    python scripts/run_psg_compare.py            # the synthetic streams
-    python scripts/run_psg_compare.py --games    # and five cartridges
+    python scripts/run_psg_compare.py              # the synthetic streams
+    python scripts/run_psg_compare.py --streams    # and the exported board streams
 
 Nuked-PSG (``reference/src/Nuked-PSG``, die-derived, GPL-2.0, pinned at d15a168) is
-the judge here: no hardware capture of a Mega Drive PSG is pinned, and the tier rule
-makes a die-derived model the judge where nothing hardware covers the question
-(docs/validation.md, "The tier rule").
+the judge here: no hardware capture of a Sega PSG's digital state exists, and the
+family's tier rule makes a die-derived model the judge where nothing hardware covers
+the question.
 
 What is compared is the chip's **digital** output: the four attenuations its four
-channels are driving, at **every input clock** (MCLK / 15, 3.58 MHz), not only at the
-one clock in sixteen a sample is taken on.  That is the whole state a listener could
-hear, sampled 16 times more finely than the chip's own output rate.  Nuked's analogue
-level is not compared, because the board uses Nuked's own measured attenuation curve
-(:data:`megadrive_python.psg.VOLUME_LEVELS`) and comparing it would be circular; the
-curve is checked in the unit tests instead.
+channels are driving, at **every input clock**, not only at the one clock in sixteen a
+sample is taken on. That is the whole state a listener could hear, sampled 16 times
+more finely than the chip's own output rate. Nuked's analogue level is not compared,
+because :data:`~sn76489_python.YM7101_LEVELS` is Nuked's own curve and comparing it
+would be circular; the curve is checked in the unit tests instead.
+
+The chip is run as :data:`~sn76489_python.YM7101_PSG`, the variant the die is. The
+other variants share the engine and differ only in data (docs/contract.md).
+
+The streams
+-----------
+
+* **synthetic**: two seeded random walks over all eight registers, every tone period,
+  every noise setting, every attenuation.
+* **--streams**: every event file in ``validation/streams/`` -- the writes a board's
+  PSG received while running a cartridge, exported by
+  ``scripts/export_board_streams.py`` (local; derived from ROMs).
 """
 
 from __future__ import annotations
 
 import argparse
-import hashlib
+import json
 import random
 import sys
+import tempfile
 import time
-import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-import audio_refs
+import referees
 
-from megadrive_python.psg import PSG
+from sn76489_python import SN76489, YM7101_PSG
 
-CARTS = Path("/data/emu/roms/megadrive")
-
-GAMES = [
-    ("Sonic The Hedgehog (USA, Europe).zip", (120,), 400),
-    ("Streets of Rage 2 (USA).zip", (200,), 400),
-    ("Gunstar Heroes (USA).zip", (200, 400, 600), 800),
-    ("Castlevania - Bloodlines (USA).zip", (200,), 400),
-    ("Phantasy Star IV (USA).zip", (200,), 400),
-]
+ROOT = Path(__file__).resolve().parent.parent
+STREAMS = ROOT / "validation" / "streams"
 
 
 def stream_random(seed: int, count: int) -> list[tuple[int, int]]:
@@ -116,19 +119,10 @@ def stream_volumes() -> list[tuple[int, int]]:
     return events
 
 
-def load_image(path: Path) -> bytes:
-    if path.suffix.lower() == ".zip":
-        with zipfile.ZipFile(path) as archive:
-            for name in archive.namelist():
-                if Path(name).suffix.lower() in (".md", ".gen", ".bin", ".smd"):
-                    return archive.read(name)
-    return path.read_bytes()
-
-
 def compare(name: str, events: list[tuple[int, int]], clocks: int, tmp: Path) -> bool:
     started = time.perf_counter()
-    reference, _levels = audio_refs.run_psg(events, clocks, tmp)
-    psg = PSG()
+    reference = referees.run_psg(events, clocks, tmp)
+    psg = SN76489(YM7101_PSG)
     index = 0
     count = len(events)
     differing = 0
@@ -149,18 +143,17 @@ def compare(name: str, events: list[tuple[int, int]], clocks: int, tmp: Path) ->
         return True
     print(
         f"  {differing:,} of {clocks:,} input clocks differ, first at {first[0]:,} "
-        f"(referee {first[1]}, board {first[2]})"
+        f"(referee {first[1]}, core {first[2]})"
     )
     return False
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    parser.add_argument("--games", action="store_true")
-    parser.add_argument("--tmp", type=Path, default=Path("/tmp"))
+    parser.add_argument("--streams", action="store_true", help="also validation/streams/")
+    parser.add_argument("--only", help="run only the streams whose name contains this")
     parser.add_argument("--tail", type=int, default=16 * 2000)
     args = parser.parse_args(argv)
-    args.tmp.mkdir(parents=True, exist_ok=True)
 
     streams = [
         ("random (seed 1, 3000 latches)", stream_random(1, 3000)),
@@ -169,28 +162,25 @@ def main(argv: list[str] | None = None) -> int:
         ("every noise setting", stream_noise()),
         ("every attenuation", stream_volumes()),
     ]
-    if args.games:
-        from megadrive_python.io import BUTTONS
-
-        for name, press_at, frames in GAMES:
-            path = CARTS / name
-            if not path.exists():
-                print(f"{name}: missing")
-                continue
-            image = load_image(path)
-            digest = hashlib.sha256(image).hexdigest()[:16]
-            _fm, writes, _cycles, _clock = audio_refs.capture_streams(
-                image, frames, press=BUTTONS["start"], press_at=press_at
-            )
-            streams.append((f"{name} ({digest}, {frames} frames, {len(writes):,} writes)", writes))
+    if args.streams:
+        for path in sorted(STREAMS.glob("*.bin")):
+            meta = json.loads(path.with_suffix(".json").read_text())
+            events = referees.read_events(path)
+            label = f"{path.stem} ({meta['sha256'][:16]}, {meta['frames']} frames)"
+            streams.append((label, events))
+    if args.only:
+        streams = [(name, events) for name, events in streams if args.only in name]
 
     failures = 0
-    for name, events in streams:
-        clocks = (events[-1][0] if events else 0) + args.tail
-        print(f"{name}: {len(events):,} writes, {clocks:,} input clocks")
-        if not compare(name, events, clocks, args.tmp):
-            failures += 1
-    print(f"\n{len(streams)} streams, {failures} not identical")
+    total = 0
+    with tempfile.TemporaryDirectory() as tmp:
+        for name, events in streams:
+            clocks = (events[-1][0] if events else 0) + args.tail
+            total += clocks
+            print(f"{name}: {len(events):,} writes, {clocks:,} input clocks")
+            if not compare(name, events, clocks, Path(tmp)):
+                failures += 1
+    print(f"\n{len(streams)} streams, {total:,} input clocks, {failures} not identical")
     return 1 if failures else 0
 
 

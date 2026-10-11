@@ -1,19 +1,19 @@
 /* A headless harness around Nuked-PSG (reference/src/Nuked-PSG, GPL-2.0+, pinned at
  * d15a168), built by validation/build_referees.sh and run as a referee.  Nothing of
- * Nuked-PSG is copied into megadrive-python: this file only drives it.
+ * Nuked-PSG is copied into sn76489-python: this file only drives it.
  *
  *   psg_ref <events.bin> <out.bin> <clocks> [every]
  *
  * events.bin: little-endian records of {u64 clock; u8 data; u8 pad}, sorted, where
- * `clock` counts YMPSG_Clock calls (the PSG's input clock: on the Mega Drive the
- * Z80's, MCLK / 15).  A write is applied before the call whose index it names.
+ * `clock` counts YMPSG_Clock calls (the PSG's input clock: on the Master System and
+ * the Mega Drive the Z80's).  A write is applied before the call whose index it names.
  *
  * out.bin: one record per `every`-th clock: {u16 attenuations; i16 output}, where
  * `attenuations` is YMPSG_Read's four nibbles (tone 1, 2, 3, noise: the attenuation
  * each channel is driving this instant, 15 = silent) and `output` is
  * YMPSG_GetOutput * 8192 rounded, i.e. Nuked's own analogue level with its measured
  * volume curve.  The attenuations are the chip's digital state and are what the
- * board is judged on; the level is recorded beside them.
+ * core is judged on; the level is recorded beside them.
  */
 #include <stdio.h>
 #include <stdlib.h>
