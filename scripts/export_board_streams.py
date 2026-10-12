@@ -34,7 +34,8 @@ import referees
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "validation" / "streams"
-ROMS = Path("/data/emu/roms")
+#: The ROMs sit beside the checkouts, as the boards do (``--roms`` to point elsewhere).
+ROMS = ROOT.parent / "roms"
 
 #: megadrive-python's five milestone cartridges: (file, frames Start is pressed at,
 #: frames). Gunstar Heroes wants Start twice -- title, then mode select.
